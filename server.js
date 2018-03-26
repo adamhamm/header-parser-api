@@ -8,7 +8,6 @@
 var fs = require('fs');
 var express = require('express');
 var app = express();
-var useragent = require('express-useragent');
 
 if (!process.env.DISABLE_XORIGIN) {
   app.use(function(req, res, next) {
@@ -33,12 +32,13 @@ app.route('/_api/package.json')
       res.type('txt').send(data.toString());
     });
   });
-  
-app.use(useragent.express());
 
 app.route('/')
     .all(function(req, res) {
-		  res.send(req.useragent);
+      var ipaddress = req.headers['x-forwarded-for'].split(',')[0];
+      var language = req.headers['accept-language'].split(',')[0];
+      var software = req.headers['user-agent'].split('(')[1].split(')')[0];
+		  res.send({'ipaddress': ipaddress, 'language': language, 'software': software});
     });
 
 // Respond not found to all the wrong routes
